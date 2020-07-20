@@ -118,6 +118,19 @@ if ( get_left_side_menu_active() )
 show_menu_animate(app_data->ret_f, (unsigned int)show_screen, ANIMATE_RIGHT);	
 };
 
+void draw_time(){
+		// отрисовка значений
+		char tim[8]; 			//	текст время		12:34_	
+		struct datetime_ dt;
+		get_current_date_time(&dt);
+		_sprintf(tim, "%02d:%02d:%02d", dt.hour, dt.min,dt.sec);
+
+		set_fg_color(COLOR_WHITE);
+		show_big_digit(3, tim, 2, 68, 8); // печатаем результат большими цифрами
+		//repaint_screen_lines(1, 176);
+		//set_update_period(1, 300); // обновляем экран через время	
+}
+
 void screen_job(){
 // при необходимости можно использовать данные экрана в этой функции
 struct app_data_** 	app_data_p = get_ptr_temp_buf_2(); 	//	указатель на указатель на данные экрана 
@@ -164,10 +177,10 @@ if (app_data->last_bt_con != check_app_state(APP_STATE_BT_CON)){
 		send_music_command(CMD_AMC_ENABLE);
 	
 }
-
-
+draw_screen();
+repaint_screen_lines(1, 176);
 //vibrate(4, 100, 100);
-set_update_period(1, 500); // обновляем экран через время
+set_update_period(1, 300); // обновляем экран через время
 }
 
 
@@ -177,6 +190,7 @@ struct app_data_ *	app_data = *app_data_p;				//	указатель на дан�
 
 // в случае отрисовки интерфейса, обновление (перенос в видеопамять) экрана выполнять нужно
 app_data->last_tick = get_tick_count();	//	установим последнюю отметку времени активности на текущее время
+
 
 struct gesture_ *gest = param;
 int result = 0;
@@ -330,8 +344,6 @@ set_update_period(1, 500);
 return result;
 };
 
-
-
 // пользовательская функция
 void draw_screen(){
 struct app_data_** 	app_data_p = get_ptr_temp_buf_2(); 	//	указатель на указатель на данные экрана 
@@ -379,7 +391,7 @@ switch (app_data->theme){
 				}
 				case STATE_PLAYING:{
 					show_elf_res_by_id(app_data->proc->index_listed , RES_PAUSE, 69, 128);		//38x38
-					show_elf_res_by_id(app_data->proc->index_listed , RES_PLAYER_EQ, 12, 73);	//38x38
+					//show_elf_res_by_id(app_data->proc->index_listed , RES_PLAYER_EQ, 12, 73);	//38x38
 					break;
 				}
 				default: break;
@@ -389,6 +401,8 @@ switch (app_data->theme){
 			show_elf_res_by_id(app_data->proc->index_listed , RES_VOL_UP_BG,   125, 23);		// 15x12
 			
 		}
+		draw_time();
+		repaint_screen_lines(1, 176);
 		break;
 	
 	}
