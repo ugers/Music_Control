@@ -119,6 +119,8 @@ show_menu_animate(app_data->ret_f, (unsigned int)show_screen, ANIMATE_RIGHT);
 };
 
 void draw_time(){
+		set_fg_color(COLOR_BLACK);
+		draw_filled_rect(0,55,176,120);
 		// отрисовка значений
 		char tim[8]; 			//	текст время		12:34_	
 		struct datetime_ dt;
@@ -127,8 +129,6 @@ void draw_time(){
 
 		set_fg_color(COLOR_WHITE);
 		show_big_digit(3, tim, 2, 68, 8); // печатаем результат большими цифрами
-		//repaint_screen_lines(1, 176);
-		//set_update_period(1, 300); // обновляем экран через время	
 }
 
 void screen_job(){
@@ -177,10 +177,10 @@ if (app_data->last_bt_con != check_app_state(APP_STATE_BT_CON)){
 		send_music_command(CMD_AMC_ENABLE);
 	
 }
-draw_screen();
-repaint_screen_lines(1, 176);
+draw_time();
+repaint_screen_lines(55, 120);
 //vibrate(4, 100, 100);
-set_update_period(1, 300); // обновляем экран через время
+set_update_period(1, 350); // обновляем экран через время
 }
 
 
@@ -402,7 +402,7 @@ switch (app_data->theme){
 			
 		}
 		draw_time();
-		repaint_screen_lines(1, 176);
+		repaint_screen_lines(20, 125);
 		break;
 	
 	}
