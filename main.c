@@ -125,10 +125,11 @@ void draw_time(){
 		char tim[8]; 			//	текст время		12:34_	
 		struct datetime_ dt;
 		get_current_date_time(&dt);
-		_sprintf(tim, "%02d:%02d:%02d", dt.hour, dt.min,dt.sec);
+		_sprintf(tim, "%02d:%02d", dt.hour, dt.min);
 
 		set_fg_color(COLOR_WHITE);
-		show_big_digit(3, tim, 2, 68, 8); // печатаем результат большими цифрами
+		show_big_digit(3, tim, 35, 68, 8); // печатаем результат большими цифрами
+		repaint_screen_lines(55, 120);
 }
 
 void screen_job(){
@@ -178,9 +179,9 @@ if (app_data->last_bt_con != check_app_state(APP_STATE_BT_CON)){
 	
 }
 draw_time();
-repaint_screen_lines(55, 120);
 //vibrate(4, 100, 100);
-set_update_period(1, 350); // обновляем экран через время
+set_update_period(1, 60000); // обновляем экран через минуту
+//set_update_period(1, 350); // обновляем экран через время
 }
 
 
@@ -402,7 +403,6 @@ switch (app_data->theme){
 			
 		}
 		draw_time();
-		repaint_screen_lines(20, 125);
 		break;
 	
 	}
