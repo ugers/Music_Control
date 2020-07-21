@@ -122,13 +122,16 @@ void draw_time(){
 		set_fg_color(COLOR_BLACK);
 		draw_filled_rect(0,55,176,120);
 		// отрисовка значений
-		char tim[8]; 			//	текст время		12:34_	
+		char clock_time[8]; 			//	текст время		12:34_	
+		char data[8];
 		struct datetime_ dt;
 		get_current_date_time(&dt);
-		_sprintf(tim, "%02d:%02d", dt.hour, dt.min);
+		_sprintf(clock_time, "%02d:%02d", dt.hour, dt.min);
+		_sprintf(data, "%02d.%02d.%02d", dt.day, dt.month, dt.year);
 
 		set_fg_color(COLOR_WHITE);
-		show_big_digit(3, tim, 35, 68, 8); // печатаем результат большими цифрами
+		show_big_digit(3, clock_time, 33, 58, 8); // печатаем результат большими цифрами
+		text_out_center(data,88,100);
 		repaint_screen_lines(55, 120);
 }
 
