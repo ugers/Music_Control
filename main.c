@@ -36,7 +36,6 @@ void show_screen (void *param0){
 struct app_data_** 	app_data_p = get_ptr_temp_buf_2(); 	//	указатель на указатель на данные экрана 
 struct app_data_ *	app_data;					//	указатель на данные экрана
 
-
 // проверка источника запуска процедуры
 if ( (param0 == *app_data_p) && get_var_menu_overlay()){ // возврат из оверлейного экрана (входящий звонок, уведомление, будильник, цель и т.д.)
 
@@ -87,7 +86,6 @@ if ( (param0 == *app_data_p) && get_var_menu_overlay()){ // возврат из 
 	  app_data->splash	=	1;	// включаем экран приветствия
   }
 }
-
 // здесь выполняем отрисовку интерфейса, обновление (перенос в видеопамять) экрана выполнять не нужно
 
 
@@ -122,16 +120,50 @@ void draw_time(){
 		set_fg_color(COLOR_BLACK);
 		draw_filled_rect(0,55,176,120);
 		// отрисовка значений
-		char clock_time[8]; 			//	текст время		12:34_	
-		char data[8];
+		char clock_time[8]; 			//	текст время		12:34
+		char data[12]; 			//	текст дата		день.месяц.год
 		struct datetime_ dt;
 		get_current_date_time(&dt);
 		_sprintf(clock_time, "%02d:%02d", dt.hour, dt.min);
 		_sprintf(data, "%02d.%02d.%02d", dt.day, dt.month, dt.year);
+		
+		char text_buffer[24];
+		char *weekday_string_ru[] = {"??", "Пн", "Вт", "Ср", "Чт", "Пт", "Сб", "Вс"};
+		char *weekday_string_en[] = {"??", "Mo", "Tu", "We", "Th", "Fr", "Sa", "Su"};
+		char *weekday_string_it[] = {"??", "Lu", "Ma", "Me", "Gi", "Ve", "Sa", "Do"};
+		char *weekday_string_fr[] = {"??", "Lu", "Ma", "Me", "Je", "Ve", "Sa", "Di"};
+		char *weekday_string_es[] = {"??", "Lu", "Ma", "Mi", "Ju", "Vi", "Sá", "Do"};
+		
+		char**	weekday_string;
+		
+		switch (get_selected_locale()){
+			case locale_ru_RU:{
+				weekday_string = weekday_string_ru;
+				break;
+			}
+			case locale_it_IT:{
+				weekday_string = weekday_string_it;
+				break;
+			}
+			case locale_fr_FR:{
+				weekday_string = weekday_string_fr;
+				break;
+			}
+			case locale_es_ES:{
+				weekday_string = weekday_string_es;
+				break;
+			}
+			default:{
+				weekday_string = weekday_string_en;
+				break;
+			}
+		}
+		_memclr(&text_buffer, 24);
 
 		set_fg_color(COLOR_WHITE);
-		show_big_digit(3, clock_time, 33, 58, 8); // печатаем результат большими цифрами
-		text_out_center(data,88,100);
+		show_big_digit(3, clock_time, 34, 58, 8); // печатаем результат(время) большими цифрами
+		text_out_center(data,88,100);	// печатаем дату
+		text_out(weekday_string[dt.weekday],4,100);	// печатаем день недели
 		repaint_screen_lines(55, 120);
 }
 
@@ -347,6 +379,7 @@ set_update_period(1, 500);
 
 return result;
 };
+	
 
 // пользовательская функция
 void draw_screen(){
