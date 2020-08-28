@@ -10,6 +10,8 @@
 */
 //#define BipEmulator
 //#define Day_Right
+//#define Day_Full_No_Year_Left
+//#define Day_Full_No_Year_Right
 //#define Day_Full_Left
 //#define Day_Full_Right
 //#define Day_Short_No_Year_Left
@@ -149,7 +151,8 @@ void draw_time(){
 		struct datetime_ dt;
 		get_current_date_time(&dt);
 		_sprintf(clock_time, "%02d:%02d", dt.hour, dt.min);
-#ifndef Day_Short_No_Year
+#if defined Day_Short_No_Year_Left || defined Day_Short_No_Year_Left || defined Day_Full_No_Year_Left || defined Day_Full_No_Year_Right
+#else
 		unsigned short year_short = dt.year-2000;
 		_sprintf(data, "%02d.%02d.%02d", dt.day, dt.month, year_short);
 #endif
@@ -157,7 +160,7 @@ void draw_time(){
 		char text_buffer[24];
 
 
-#if defined Day_Full_Left || defined Day_Full_Right
+#if defined Day_Full_Left || defined Day_Full_Right || defined Day_Full_No_Year_Left || defined Day_Full_No_Year_Right
 		char *weekday_string_ru[] = {"??", "Понедельник", "Вторник", "Среда", "Четверг", "Пятница", "Суббота", "Воскресенье"};
 		char *weekday_string_en[] = {"??", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday"};
 		char *weekday_string_it[] = {"??", "Lunedì", "Martedì", "Mercoledì", "Giovedì", "Venerdì", "Sabato", "Domenica"};
@@ -204,6 +207,14 @@ void draw_time(){
 		#elif defined Day_Full_Right
 			text_out_center(data,36,100);	// печатаем дату
 			text_out(weekday_string[dt.weekday],72,100);	// печатаем день недели
+		#elif defined Day_Full_No_Year_Left
+			_sprintf(data, "%02d.%02d", dt.day, dt.month);
+			text_out_center(data,152,100);	// печатаем дату
+			text_out(weekday_string[dt.weekday],4,100);	// печатаем день недели
+		#elif defined Day_Full_No_Year_Right
+			_sprintf(data, "%02d.%02d", dt.day, dt.month);
+			text_out_center(data,28,100);	// печатаем дату
+			text_out(weekday_string[dt.weekday],70,100);	// печатаем день недели
 		#else
 			#if defined Day_Short_No_Year_Left
 				_sprintf(data, "%02s.%02d.%02d",weekday_string[dt.weekday], dt.day, dt.month);
@@ -467,7 +478,7 @@ if (app_data->splash){
 
 	int result = get_res_params(app_data->proc->index_listed, 0, &res_params);
 	if (result){
-		text_out_center("Music control\nby Volkov Maxim", 88, 70);
+		text_out_center("Music control\n by Volkov Maxim", 88, 70);
 		return;
 	};
 
@@ -551,7 +562,7 @@ int size = 2;
 d[0] = 0xFE;	//	команда управления музыкой
 d[1] = cmd;
 
-// если установлено BT соежинение, отправляем команду
+// если установлено BT соединение, отправляем команду
 #ifndef BipEmulator
 if (check_app_state(APP_STATE_BT_CON)){
 	send_host_app_data(0x42, 0x41, size, &d[0], 0);
