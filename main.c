@@ -8,8 +8,19 @@
 	- релиз управления музыкой
 	
 */
-
-#include <libbip.h>
+//#define BipEmulator
+//#define Day_Right
+//#define Day_Full_Left
+//#define Day_Full_Right
+//#define Day_Short_No_Year_Left
+//#define Day_Short_No_Year_Right
+#ifdef BipEmulator
+	// статусы функции get_app_state
+	#define APP_STATE_BT_CON		0x200
+	#include "libbip.h"
+#else
+	#include <libbip.h>
+#endif
 #include "main.h"
 
 //	структура меню экрана - для каждого экрана своя
@@ -33,16 +44,20 @@ int main(int param0, char** argv){	//	здесь переменная argv не 
 }
 
 void show_screen (void *param0){
-struct app_data_** 	app_data_p = get_ptr_temp_buf_2(); 	//	указатель на указатель на данные экрана 
+struct app_data_**  app_data_p = (struct app_data_ **)get_ptr_temp_buf_2();    //  указатель на указатель на данные экрана
 struct app_data_ *	app_data;					//	указатель на данные экрана
+
 
 // проверка источника запуска процедуры
 if ( (param0 == *app_data_p) && get_var_menu_overlay()){ // возврат из оверлейного экрана (входящий звонок, уведомление, будильник, цель и т.д.)
 
 	app_data = *app_data_p;					//	указатель на данные необходимо сохранить для исключения 
 											//	высвобождения памяти функцией reg_menu
-	*app_data_p = NULL;						//	обнуляем указатель для передачи в функцию reg_menu	
-
+	#ifdef BipEmulator
+		*app_data_p = (app_data_*)NULL;						//	обнуляем указатель для передачи в функцию reg_menu
+	#else
+		*app_data_p = NULL;						//	обнуляем указатель для передачи в функцию reg_menu	
+	#endif
 	// 	создаем новый экран, при этом указатель temp_buf_2 был равен 0 и память не была высвобождена	
 	reg_menu(&screen_data, 0); 				// 	menu_overlay=0
 	
@@ -64,7 +79,12 @@ if ( (param0 == *app_data_p) && get_var_menu_overlay()){ // возврат из 
 	_memclr(app_data, sizeof(struct app_data_));
 	
 	//	значение param0 содержит указатель на данные запущенного процесса структура Elf_proc_
-	app_data->proc = param0;
+	#ifdef BipEmulator
+		app_data->proc = (Elf_proc_*)param0;
+	#else
+		app_data->proc = param0;
+	#endif
+
 	
 	// запомним адрес указателя на функцию в которую необходимо вернуться после завершения данного экрана
 	if ( param0 && app_data->proc->elf_finish ) 			//	если указатель на возврат передан, то возвоащаемся на него
@@ -77,8 +97,12 @@ if ( (param0 == *app_data_p) && get_var_menu_overlay()){ // возврат из 
 	app_data->state = STATE_PAUSED;
 	app_data->theme = 0;
 	app_data->last_tick = get_tick_count();	//	установим последнюю отметку времени активности на текущее время
+#ifdef BipEmulator
+	app_data->last_bt_con = 1;
+#else
 	app_data->last_bt_con = check_app_state(APP_STATE_BT_CON);
-	
+#endif // !BipEmulator
+
 	//	если запуск был из быстрого меню, не включать экран приветствия
   if ( get_left_side_menu_active() ) {
 	  app_data->splash	=	0;	// выключаем экран приветствия
@@ -102,7 +126,7 @@ set_update_period(1,  app_data->splash?2000:500); // обновляем экра
 }
 
 void key_press_screen(){
-struct app_data_** 	app_data_p = get_ptr_temp_buf_2(); 	//	указатель на указатель на данные экрана 
+struct app_data_**  app_data_p = (struct app_data_ **)get_ptr_temp_buf_2();    //  указатель на указатель на данные экрана
 struct app_data_ *	app_data = *app_data_p;				//	указатель на данные экрана
 
 send_music_command(CMD_AMC_DISABLE);
@@ -125,15 +149,27 @@ void draw_time(){
 		struct datetime_ dt;
 		get_current_date_time(&dt);
 		_sprintf(clock_time, "%02d:%02d", dt.hour, dt.min);
-		_sprintf(data, "%02d.%02d.%02d", dt.day, dt.month, dt.year);
+#ifndef Day_Short_No_Year
+		unsigned short year_short = dt.year-2000;
+		_sprintf(data, "%02d.%02d.%02d", dt.day, dt.month, year_short);
+#endif
 		
 		char text_buffer[24];
+
+
+#if defined Day_Full_Left || defined Day_Full_Right
+		char *weekday_string_ru[] = {"??", "Понедельник", "Вторник", "Среда", "Четверг", "Пятница", "Суббота", "Воскресенье"};
+		char *weekday_string_en[] = {"??", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday"};
+		char *weekday_string_it[] = {"??", "Lunedì", "Martedì", "Mercoledì", "Giovedì", "Venerdì", "Sabato", "Domenica"};
+		char *weekday_string_fr[] = {"??", "Lundi", "Mardi", "Mercredi", "Jeudi", "Vendredi", "Samedi", "Dimanche"};				
+		char *weekday_string_es[] = {"??", "Lunes", "Martes", "Miércoles", "Jueves", "Viernes", "Sábado", "Domingo"};
+#else
 		char *weekday_string_ru[] = {"??", "Пн", "Вт", "Ср", "Чт", "Пт", "Сб", "Вс"};
 		char *weekday_string_en[] = {"??", "Mo", "Tu", "We", "Th", "Fr", "Sa", "Su"};
 		char *weekday_string_it[] = {"??", "Lu", "Ma", "Me", "Gi", "Ve", "Sa", "Do"};
 		char *weekday_string_fr[] = {"??", "Lu", "Ma", "Me", "Je", "Ve", "Sa", "Di"};
 		char *weekday_string_es[] = {"??", "Lu", "Ma", "Mi", "Ju", "Vi", "Sá", "Do"};
-		
+#endif
 		char**	weekday_string;
 		
 		switch (get_selected_locale()){
@@ -162,14 +198,35 @@ void draw_time(){
 
 		set_fg_color(COLOR_WHITE);
 		show_big_digit(3, clock_time, 34, 58, 8); // печатаем результат(время) большими цифрами
-		text_out_center(data,88,100);	// печатаем дату
-		text_out(weekday_string[dt.weekday],4,100);	// печатаем день недели
+		#if defined Day_Full_Left
+			text_out_center(data,143,100);	// печатаем дату
+			text_out(weekday_string[dt.weekday],3,100);	// печатаем день недели
+		#elif defined Day_Full_Right
+			text_out_center(data,36,100);	// печатаем дату
+			text_out(weekday_string[dt.weekday],72,100);	// печатаем день недели
+		#else
+			#if defined Day_Short_No_Year_Left
+				_sprintf(data, "%02s.%02d.%02d",weekday_string[dt.weekday], dt.day, dt.month);
+				text_out_center(data,88,100);	// печатаем день недели
+			#elif defined Day_Short_No_Year_Right
+				_sprintf(data, "%02d.%02d.%02s", dt.day, dt.month,weekday_string[dt.weekday]);
+				text_out_center(data,88,100);	// печатаем день недели
+			#else
+				text_out_center(data,88,100);	// печатаем дату
+				#ifdef Day_Right
+					text_out(weekday_string[dt.weekday],155,100);	// печатаем день недели
+				#else
+					text_out(weekday_string[dt.weekday],4,100);	// печатаем день недели
+				#endif
+			#endif
+		#endif
+		
 		repaint_screen_lines(55, 120);
 }
 
 void screen_job(){
 // при необходимости можно использовать данные экрана в этой функции
-struct app_data_** 	app_data_p = get_ptr_temp_buf_2(); 	//	указатель на указатель на данные экрана 
+struct app_data_**  app_data_p = (struct app_data_ **)get_ptr_temp_buf_2();    //  указатель на указатель на данные экрана 
 struct app_data_ *	app_data = *app_data_p;				//	указатель на данные экрана
 
 // делаем периодическое действие: анимация, увеличение счетчика, обновление экрана,
@@ -202,6 +259,7 @@ if ( (get_tick_count() - app_data->last_tick) > ((app_data->state==STATE_PAUSED)
 
 
 // если состояние BT изменилось, зафиксируем это и перересуем экран
+#ifndef BipEmulator
 if (app_data->last_bt_con != check_app_state(APP_STATE_BT_CON)){
 	
 	app_data->last_bt_con = check_app_state(APP_STATE_BT_CON);	
@@ -213,6 +271,7 @@ if (app_data->last_bt_con != check_app_state(APP_STATE_BT_CON)){
 		send_music_command(CMD_AMC_ENABLE);
 	
 }
+#endif
 draw_time();
 //vibrate(4, 100, 100);
 set_update_period(1, 60000); // обновляем экран через минуту
@@ -221,14 +280,18 @@ set_update_period(1, 60000); // обновляем экран через мин�
 
 
 int dispatch_screen (void *param){
-struct app_data_** 	app_data_p = get_ptr_temp_buf_2(); 	//	указатель на указатель на данные экрана 
+struct app_data_**  app_data_p = (struct app_data_ **)get_ptr_temp_buf_2();    //  указатель на указатель на данные экрана
 struct app_data_ *	app_data = *app_data_p;				//	указатель на данные экрана
 
 // в случае отрисовки интерфейса, обновление (перенос в видеопамять) экрана выполнять нужно
 app_data->last_tick = get_tick_count();	//	установим последнюю отметку времени активности на текущее время
 
 
-struct gesture_ *gest = param;
+#ifdef BipEmulator
+	 struct gesture_ *gest = (gesture_*) param;
+#else
+	 struct gesture_ *gest = param;
+#endif
 int result = 0;
 
 switch (gest->gesture){
@@ -243,9 +306,11 @@ switch (gest->gesture){
 			repaint_screen_lines(0, 176);
 			return result;
 		}
-		
+		#ifdef BipEmulator
+		app_data->last_bt_con = 1;
+		#else
 		app_data->last_bt_con = check_app_state(APP_STATE_BT_CON);
-
+		#endif
 		if (app_data->last_bt_con){
 	
 			int btn = BTN_NONE;
@@ -255,15 +320,15 @@ switch (gest->gesture){
 				int btn_index = gest->touch_pos_x / (176/3);
 				
 				//определяем какая кнопка нажата
-				if (btn_index == 0) 	//	левая кнопка
+				if (btn_index == 0) {	//	левая кнопка
 					btn = BTN_PREV;
-				else 
-				if (btn_index == 1){	//	средняя кнопка		
-					btn = (app_data->state==STATE_PAUSED)?	BTN_PLAY	:	BTN_PAUSE;
+				} else {
+					if (btn_index == 1) {	//	средняя кнопка		
+						btn = (app_data->state==STATE_PAUSED)?	BTN_PLAY	:	BTN_PAUSE;
+					} else {					//	то что осталось - правая кнопка
+						btn = BTN_NEXT;
+					}
 				}
-				else 					//	то что осталось - правая кнопка
-					btn = BTN_NEXT;
-				
 			}  else 
 			{			
 				if (gest->touch_pos_x > 88){							
@@ -305,7 +370,11 @@ switch (gest->gesture){
 					// запускаем dispatch_left_side_menu с параметром param в результате произойдет запуск соответствующего бокового экрана
 					// при этом произойдет выгрузка данных текущего приложения и его деактивация.
 					void* show_f = get_ptr_show_menu_func();
-					dispatch_left_side_menu(param);
+						#ifdef BipEmulator
+							dispatch_left_side_menu((gesture_*)param);
+						#else
+							dispatch_left_side_menu(param);
+						#endif
 										
 					if ( get_ptr_show_menu_func() == show_f ){
 						// если dispatch_left_side_menu отработал безуспешно (листать некуда) то в show_menu_func по прежнему будет 
@@ -379,11 +448,10 @@ set_update_period(1, 500);
 
 return result;
 };
-	
 
 // пользовательская функция
 void draw_screen(){
-struct app_data_** 	app_data_p = get_ptr_temp_buf_2(); 	//	указатель на указатель на данные экрана 
+struct app_data_**  app_data_p = (struct app_data_ **)get_ptr_temp_buf_2();    //  указатель на указатель на данные экрана
 struct app_data_ *	app_data = *app_data_p;				//	указатель на данные экрана
 struct res_params_ res_params;							//	параметры графического реурса
 
@@ -484,9 +552,11 @@ d[0] = 0xFE;	//	команда управления музыкой
 d[1] = cmd;
 
 // если установлено BT соежинение, отправляем команду
+#ifndef BipEmulator
 if (check_app_state(APP_STATE_BT_CON)){
 	send_host_app_data(0x42, 0x41, size, &d[0], 0);
 }
+#endif // !BipEmulator
 
 return 0;
 }
