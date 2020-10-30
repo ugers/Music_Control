@@ -16,6 +16,8 @@
 //#define Day_Full_Right
 //#define Day_Short_No_Year_Left
 //#define Day_Short_No_Year_Right
+#define Statusbar
+
 #ifdef BipEmulator
 	// статусы функции get_app_state
 	#define APP_STATE_BT_CON		0x200
@@ -24,6 +26,11 @@
 	#include <libbip.h>
 #endif
 #include "main.h"
+#ifdef Statusbar
+	#include "BipStatusbarLib.h"
+#endif // Statusbar
+
+
 
 //	структура меню экрана - для каждого экрана своя
 struct regmenu_ screen_data = {
@@ -141,7 +148,7 @@ if ( get_left_side_menu_active() )
 // вызываем функцию возврата (обычно это меню запуска), в качестве параметра указываем адрес функции нашего приложения
 show_menu_animate(app_data->ret_f, (unsigned int)show_screen, ANIMATE_RIGHT);	
 };
-
+#ifndef Statusbar
 void draw_time(){
 		set_fg_color(COLOR_BLACK);
 		draw_filled_rect(0,55,176,120);
@@ -234,6 +241,9 @@ void draw_time(){
 		
 		repaint_screen_lines(55, 120);
 }
+#endif // !Statusbar
+
+
 
 void screen_job(){
 // при необходимости можно использовать данные экрана в этой функции
@@ -283,7 +293,12 @@ if (app_data->last_bt_con != check_app_state(APP_STATE_BT_CON)){
 	
 }
 #endif
+#ifdef Statusbar
+show_statusbar(3, COLOR_BLACK, COLOR_WHITE);
+#else
 draw_time();
+#endif // Statusbar
+
 //vibrate(4, 100, 100);
 set_update_period(1, 60000); // обновляем экран через минуту
 //set_update_period(1, 350); // обновляем экран через время
@@ -318,9 +333,9 @@ switch (gest->gesture){
 			return result;
 		}
 		#ifdef BipEmulator
-		app_data->last_bt_con = 1;
+			app_data->last_bt_con = 1;
 		#else
-		app_data->last_bt_con = check_app_state(APP_STATE_BT_CON);
+			app_data->last_bt_con = check_app_state(APP_STATE_BT_CON);
 		#endif
 		if (app_data->last_bt_con){
 	
@@ -340,12 +355,11 @@ switch (gest->gesture){
 						btn = BTN_NEXT;
 					}
 				}
-			}  else 
-			{			
+			} else {			
 				if (gest->touch_pos_x > 88){							
 					btn = BTN_VOL_UP;
 				} else {
-					btn = BTN_VOL_DOWN;	
+					btn = BTN_VOL_DOWN;
 				}
 			}
 			
@@ -353,12 +367,56 @@ switch (gest->gesture){
 				vibrate(1,70,0);
 			
 			switch (btn){
-				case BTN_VOL_UP:		{	send_music_command(CMD_VOL_UP);		break;}
-				case BTN_VOL_DOWN:		{	send_music_command(CMD_VOL_DOWN); 	break;}
-				case BTN_PREV:			{	send_music_command(CMD_PREV);  app_data->state = STATE_PLAYING;		break;}
-				case BTN_NEXT:			{	send_music_command(CMD_NEXT);  app_data->state = STATE_PLAYING;		break;}
-				case BTN_PAUSE:			{	send_music_command(CMD_PAUSE); app_data->state = STATE_PAUSED;		break;}
-				case BTN_PLAY: 			{	send_music_command(CMD_PLAY);  app_data->state = STATE_PLAYING;		break;}
+			//Changed by trace
+				case BTN_VOL_UP: {
+						send_music_command(CMD_VOL_UP);
+						#ifdef Statusbar
+							show_elf_res_by_id(app_data->proc->index_listed , RES_VOL_UP_BG,  125, 40);
+						#else
+							show_elf_res_by_id(app_data->proc->index_listed , RES_VOL_UP_BG,  125, 21);
+						#endif // Statusbar
+						repaint_screen_lines(0, 176);
+						break;
+					}
+				case BTN_VOL_DOWN: {
+						send_music_command(CMD_VOL_DOWN);
+						#ifdef Statusbar
+							show_elf_res_by_id(app_data->proc->index_listed , RES_VOL_DOWN_BG,  33, 40);
+						#else
+							show_elf_res_by_id(app_data->proc->index_listed , RES_VOL_DOWN_BG,  33, 21);
+						#endif // Statusbar
+						repaint_screen_lines(0, 176);
+						break;
+					}
+				case BTN_PREV: {
+						send_music_command(CMD_PREV);
+						show_elf_res_by_id(app_data->proc->index_listed , RES_PREV_BLACK, 4, 121);
+						repaint_screen_lines(0, 176);
+						app_data->state = STATE_PLAYING;
+						break;
+					}
+				case BTN_NEXT: {
+						send_music_command(CMD_NEXT);
+						show_elf_res_by_id(app_data->proc->index_listed , RES_NEXT_BLACK, 126, 121);
+						repaint_screen_lines(0, 176);
+						app_data->state = STATE_PLAYING;
+						break;
+					}
+				case BTN_PAUSE: {
+						send_music_command(CMD_PAUSE);
+						show_elf_res_by_id(app_data->proc->index_listed , RES_PAUSE_BLACK, 55, 121);
+						repaint_screen_lines(0, 176);
+						app_data->state = STATE_PAUSED;
+						break;
+					}
+				case BTN_PLAY: {
+						send_music_command(CMD_PLAY);
+						show_elf_res_by_id(app_data->proc->index_listed , RES_PLAY_BLACK, 55, 121);
+						repaint_screen_lines(0, 176);
+						app_data->state = STATE_PLAYING;
+						break;
+					}
+			//End Changes
 				default: break;
 			}
 			
@@ -490,36 +548,56 @@ if (app_data->splash){
 switch (app_data->theme){
 
 	case 0:{
-		show_elf_res_by_id(app_data->proc->index_listed , RES_PLAYER_BG,  0,  2);			// 176x51
+		#ifdef Statusbar
+			show_elf_res_by_id(app_data->proc->index_listed , RES_PLAYER_BG,  0,  23);			// 176x51
+		#else
+			show_elf_res_by_id(app_data->proc->index_listed , RES_PLAYER_BG,  0,  4);			// 176x51
+		#endif // Statusbar
 		show_elf_res_by_id(app_data->proc->index_listed , RES_PLAYER_BTN_BG,  0, 121);		// 176x51
-		
+
 		if (app_data->last_bt_con){
-			show_elf_res_by_id(app_data->proc->index_listed , RES_PREV,  	  12, 133);		// 28x28
-			show_elf_res_by_id(app_data->proc->index_listed , RES_NEXT, 	 135, 133);		// 28x28
-			
-			show_elf_res_by_id(app_data->proc->index_listed , RES_VOL_DOWN,  36, 23);		// 15x12
-			show_elf_res_by_id(app_data->proc->index_listed , RES_VOL_UP,   125, 23);		// 15x12
-			
+			show_elf_res_by_id(app_data->proc->index_listed , RES_PREV,  	  4, 121);		// 28x28
+			show_elf_res_by_id(app_data->proc->index_listed , RES_NEXT, 	 126, 121);		// 28x28
+			#ifdef Statusbar
+				show_elf_res_by_id(app_data->proc->index_listed , RES_VOL_DOWN,  33, 40);		// 15x12
+				show_elf_res_by_id(app_data->proc->index_listed , RES_VOL_UP,   125, 40);		// 15x12
+			#else
+				show_elf_res_by_id(app_data->proc->index_listed , RES_VOL_DOWN,  33, 21);		// 15x12
+				show_elf_res_by_id(app_data->proc->index_listed , RES_VOL_UP,   125, 21);		// 15x12
+			#endif // Statusbar
 			switch (app_data->state){
 				case STATE_PAUSED:	{
-					show_elf_res_by_id(app_data->proc->index_listed , RES_PLAY, 69, 128);	//38x38
+					show_elf_res_by_id(app_data->proc->index_listed , RES_PLAY, 55, 121);	//38x38
 					break;
 				}
 				case STATE_PLAYING:{
-					show_elf_res_by_id(app_data->proc->index_listed , RES_PAUSE, 69, 128);		//38x38
-					//show_elf_res_by_id(app_data->proc->index_listed , RES_PLAYER_EQ, 12, 73);	//38x38
+					show_elf_res_by_id(app_data->proc->index_listed , RES_PAUSE, 55, 121);
+					#ifdef Statusbar
+						//show_elf_res_by_id(app_data->proc->index_listed , RES_PLAYER_EQ,  8, 72);	// 176x51
+						show_elf_res_by_id(app_data->proc->index_listed , RES_PLAYER_EQ,  8, 73);	// 176x51
+					#endif // Statusbar
 					break;
 				}
 				default: break;
 			}
 		} else {
-			show_elf_res_by_id(app_data->proc->index_listed , RES_VOL_DOWN_BG,  36, 23);		// 15x12
-			show_elf_res_by_id(app_data->proc->index_listed , RES_VOL_UP_BG,   125, 23);		// 15x12
-			
+			#ifdef Statusbar
+				show_elf_res_by_id(app_data->proc->index_listed , RES_VOL_DOWN_BG,  36, 44);		// 15x12
+				show_elf_res_by_id(app_data->proc->index_listed , RES_VOL_UP_BG,   125, 44);		// 15x12
+			#else
+				show_elf_res_by_id(app_data->proc->index_listed , RES_VOL_DOWN_BG,  36, 25);		// 15x12
+				show_elf_res_by_id(app_data->proc->index_listed , RES_VOL_UP_BG,   125, 25);		// 15x12
+			#endif // Statusbar
 		}
+#ifdef Statusbar
+		show_statusbar(3, COLOR_BLACK, COLOR_WHITE);
+#else
 		draw_time();
+#endif // Statusbar
+
+
 		break;
-	
+
 	}
 	
 	default: break;
