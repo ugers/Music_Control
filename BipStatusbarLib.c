@@ -39,17 +39,19 @@ void show_statusbar(int y, int bgColor,int fgColor){
 	draw_filled_rect_bg(153, y + 1, 171, y + 15); // сама батарейка
 	draw_filled_rect_bg(171, y + 5, 173, y + 11); //кончик
 	#endif
-		if (get_fw_version() != 11536)
-		{
-			//set_bg_color(COLOR_YELLOW);
-			//draw_filled_rect_bg(x + 2, y + 2, x + 21, y + 10);
-		}else{
+	word battery_percentage;
 	#ifdef BipEmulator
-			word battery_percentage = 100;
+			battery_percentage = 100;
 	#else
-			word battery_percentage = *((word*)(0x20000334));
+		if (get_fw_version() == 11536){
+			battery_percentage = *((word*)(0x20000334));
+		}else if (get_fw_version() == 11205){
+			battery_percentage = *((word*)(0x2000067C));
+		}else if (get_fw_version() == 11512){
+			battery_percentage = *((word*)(0x200002C8));
+		}
 	#endif
-			#ifdef BATTERY_ICON
+		#ifdef BATTERY_ICON
 			//Цвет индикатора батареи Colors battery indicator
 			char r_count = battery_percentage / 33;
 			r_count = r_count > 2 ? 2 : r_count < 1 ? 0 : r_count; // if r_count > 2 = 2 elseif r_count < 1 = 0 else r_count
@@ -76,7 +78,6 @@ void show_statusbar(int y, int bgColor,int fgColor){
 					text_out("%", 162, y);
 				#endif
 			#endif
-		}
 set_bg_color(bgColor); // делаем фон
 #ifdef TIME
 	// ВРЕМЯ
