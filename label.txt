@@ -1,3 +1,7 @@
 Music control
 RU	Музыка
 GR	Μουσική
+IT	Musica
+ES	Música
+FR	La musique
+DE	Musiksteuerung

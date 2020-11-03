@@ -18,7 +18,6 @@
 @SET OBJCOPY=%EABI%-objcopy
 @SET GCC=%EABI%-gcc
 @SET NM=%EABI%-nm
-@SET ELFUSCATE=..\elfuscate.exe
 
 if exist label.txt (
 set /p LABEL=< label.txt
@@ -51,18 +50,15 @@ SET LABEL = %PROGRAM_NAME%
 @call :echoColor 0B "Итого: "
 @call :echoColor 0E "%n%" 1
 
-@call :echoColor 0B "Сборка:"
-@call :echoColor 07 "	...создание elf файла"	1
+@call :echoColor 0B "Сборка..."
 %LD% -Map %PARTNAME%.map -o %PROGRAM_NAME%.elf %FILES_TO_COMPILE% %LD_OPT% %LIB_BIP%
 @if errorlevel 1 goto :error
 
 if exist label.txt (
-@call :echoColor 07 "	...название"	1
 %OBJCOPY%  %PROGRAM_NAME%.elf --add-section .elf.label=label.txt
 )
 
 @call :EchoN "%PROGRAM_NAME%" > name.txt
-@call :echoColor 07 "	...elf_name"	1
 %OBJCOPY%  %PROGRAM_NAME%.elf --add-section .elf.name=name.txt
 if exist name.txt del name.txt
 @if errorlevel 1 goto :error
@@ -72,20 +68,7 @@ if exist asset.res (
 %OBJCOPY%  %PROGRAM_NAME%.elf --add-section .elf.resources=asset.res
 )
 
-if exist settings.bin (
-@call :echoColor 07 "	...настройки"	1
-%OBJCOPY%  %PROGRAM_NAME%.elf --add-section .elf.settings=settings.bin
-)
-
-if exist %ELFUSCATE% (
-@call :echoColor 07 "	...обфускация"	1
-%ELFUSCATE% -f %PROGRAM_NAME_%.elf %PROGRAM_NAME%.elf > nul
-del %PROGRAM_NAME%.elf > nul
-move %PROGRAM_NAME_%.elf %PROGRAM_NAME%.elf > nul
-)
-
-
-@call :echoColor 0A "...OK" 1
+@call :echoColor 0A "OK" 1
 @call :echoColor 0B "Сборка окончена." 1
 
 :done_

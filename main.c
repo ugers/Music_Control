@@ -1,11 +1,17 @@
 /*
          Application for Amazfit Bip BipOS
-	(C) Maxim Volkov  2019 <Maxim.N.Volkov@ya.ru>
+	(C) Maxim Volkov  2020 <Maxim.N.Volkov@ya.ru>
+
 	
 	Приложение для управления музыкой с Amazfit Bip
 	
 	v.1.0
 	- релиз управления музыкой
+	
+	(C) trace 2020
+	(C) ugers 2020	
+	MOD
+	Модифицированная версия приложения для управления музыкой. Изменены ресусры,добавлен эффект нажатия кнопок, добавлен статусбар
 	
 */
 //#define BipEmulator

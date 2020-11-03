@@ -1,11 +1,14 @@
 /*
-	Application template for Amazfit Bip BipOS
-	(C) Maxim Volkov  2019 <Maxim.N.Volkov@ya.ru>
+	Application for Amazfit Bip BipOS
+	(C) Maxim Volkov  2020 <Maxim.N.Volkov@ya.ru>
 	
-	Шаблон приложения, заголовочный файл
-
+	Приложение для управления музыкой с Amazfit Bip
+	(C) trace 2020
+	(C) ugers 2020	
+	MOD
+	Модифицированная версия приложения для управления музыкой. Изменены ресусры,добавлен эффект нажатия кнопок, добавлен статусбар
 */
-
+#include "libbip.h"
 #ifndef __APP_MUSIC_H__
 #define __APP_MUSIC_H__
 
@@ -41,14 +44,17 @@
 #define RES_PLAYER_BTN_BG	1
 #define RES_PLAYER_EQ		3
 #define RES_VOL_DOWN		4
-#define RES_VOL_UP			6
-#define RES_VOL_DOWN_BG		5
-#define RES_VOL_UP_BG		7
-#define RES_NEXT			8
-#define RES_PREV			11
-#define RES_PLAY			10
-#define RES_PAUSE			9
-
+#define RES_VOL_UP			5
+#define RES_VOL_DOWN_BG		10
+#define RES_VOL_UP_BG		11
+#define RES_NEXT			6
+#define RES_PREV			9
+#define RES_PLAY			8
+#define RES_PAUSE			7
+#define RES_NEXT_BLACK		13
+#define RES_PREV_BLACK		12
+#define RES_PLAY_BLACK		15
+#define RES_PAUSE_BLACK		14
 
 // состояние плеера
 #define STATE_PAUSED		0
@@ -69,16 +75,21 @@
 #define TIMEOUT_PAUSED	1800000		//	30 минут
 
 
+// состояние подсветки
+#define BACKLIGHT_OFF		0
+#define BACKLIGHT_ON		1
+
 
 // структура данных для нашего экрана
 struct app_data_ {
-			void* 	ret_f;					//	адрес функции возврата
-			Elf_proc_* proc;				//	указатель на данные процесса
-			int 	state; 					//	состояние плеера
-			int 	theme;					//	тема раскладка кнопок
-			int 	last_tick;				//	отметка времени последней активности
-			int 	last_bt_con;			//	последнее значение соединения BT
-			int 	splash;					//	активный приветственный экран
+			void* 	ret_f;								//	адрес функции возврата
+			Elf_proc_* proc;							//	указатель на данные процесса
+			int 				state; 					//	состояние плеера
+			int 				theme;					//	тема раскладка кнопок
+			int 				last_tick;				//	отметка времени последней активности
+			int 				last_bt_con;			//	последнее значение соединения BT
+			int 				splash;					//	активный приветственный экран
+			unsigned int		sec;
 };
 
 // template.c
