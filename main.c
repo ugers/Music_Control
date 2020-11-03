@@ -551,30 +551,30 @@ switch (app_data->theme){
 		#ifdef Statusbar
 			show_elf_res_by_id(app_data->proc->index_listed , RES_PLAYER_BG,  0,  23);			// 176x51
 		#else
-			show_elf_res_by_id(app_data->proc->index_listed , RES_PLAYER_BG,  0,  4);			// 176x51
+			show_elf_res_by_id(app_data->proc->index_listed , RES_PLAYER_BG,  0,  2);			// 176x51
 		#endif // Statusbar
 		show_elf_res_by_id(app_data->proc->index_listed , RES_PLAYER_BTN_BG,  0, 121);		// 176x51
 
 		if (app_data->last_bt_con){
-			show_elf_res_by_id(app_data->proc->index_listed , RES_PREV,  	  4, 121);		// 28x28
-			show_elf_res_by_id(app_data->proc->index_listed , RES_NEXT, 	 126, 121);		// 28x28
+			show_elf_res_by_id(app_data->proc->index_listed , RES_PREV,  	  12, 133);		// 28x28
+			show_elf_res_by_id(app_data->proc->index_listed , RES_NEXT, 	 135, 133);		// 28x28
 			#ifdef Statusbar
 				show_elf_res_by_id(app_data->proc->index_listed , RES_VOL_DOWN,  33, 40);		// 15x12
 				show_elf_res_by_id(app_data->proc->index_listed , RES_VOL_UP,   125, 40);		// 15x12
 			#else
-				show_elf_res_by_id(app_data->proc->index_listed , RES_VOL_DOWN,  33, 21);		// 15x12
-				show_elf_res_by_id(app_data->proc->index_listed , RES_VOL_UP,   125, 21);		// 15x12
+				show_elf_res_by_id(app_data->proc->index_listed , RES_VOL_DOWN,  36, 23);		// 15x12
+				show_elf_res_by_id(app_data->proc->index_listed , RES_VOL_UP,   125, 23);		// 15x12
 			#endif // Statusbar
 			switch (app_data->state){
 				case STATE_PAUSED:	{
-					show_elf_res_by_id(app_data->proc->index_listed , RES_PLAY, 55, 121);	//38x38
+					show_elf_res_by_id(app_data->proc->index_listed , RES_PLAY, 69, 128);	//38x38
 					break;
 				}
 				case STATE_PLAYING:{
-					show_elf_res_by_id(app_data->proc->index_listed , RES_PAUSE, 55, 121);
+					show_elf_res_by_id(app_data->proc->index_listed , RES_PAUSE, 69, 128);		//38x38
 					#ifdef Statusbar
 						//show_elf_res_by_id(app_data->proc->index_listed , RES_PLAYER_EQ,  8, 72);	// 176x51
-						show_elf_res_by_id(app_data->proc->index_listed , RES_PLAYER_EQ,  8, 73);	// 176x51
+						show_elf_res_by_id(app_data->proc->index_listed , RES_PLAYER_EQ, 12, 73);	//38x38
 					#endif // Statusbar
 					break;
 				}
@@ -585,8 +585,8 @@ switch (app_data->theme){
 				show_elf_res_by_id(app_data->proc->index_listed , RES_VOL_DOWN_BG,  36, 44);		// 15x12
 				show_elf_res_by_id(app_data->proc->index_listed , RES_VOL_UP_BG,   125, 44);		// 15x12
 			#else
-				show_elf_res_by_id(app_data->proc->index_listed , RES_VOL_DOWN_BG,  36, 25);		// 15x12
-				show_elf_res_by_id(app_data->proc->index_listed , RES_VOL_UP_BG,   125, 25);		// 15x12
+				show_elf_res_by_id(app_data->proc->index_listed , RES_VOL_DOWN_BG,  36, 23);		// 15x12
+				show_elf_res_by_id(app_data->proc->index_listed , RES_VOL_UP_BG,   125, 23);		// 15x12
 			#endif // Statusbar
 		}
 #ifdef Statusbar

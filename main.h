@@ -48,7 +48,10 @@
 #define RES_PREV			11
 #define RES_PLAY			10
 #define RES_PAUSE			9
-
+#define RES_NEXT_BLACK		13
+#define RES_PREV_BLACK		12
+#define RES_PLAY_BLACK		15
+#define RES_PAUSE_BLACK		14
 
 // состояние плеера
 #define STATE_PAUSED		0
