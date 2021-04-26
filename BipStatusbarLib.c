@@ -50,7 +50,7 @@ void show_statusbar(int y, int bgColor,int fgColor){
 			#ifdef BipEmulator
 			char charging = 1;
 			#else
-			char charging = IS_CHARGE_PLUGGED;
+			char charging = check_app_state(APP_STATE_CHARGE_PLUGGED);
 			#endif
 			//Цвет индикатора батареи Colors battery indicator
 			char r_count = battery_percentage / 33;
