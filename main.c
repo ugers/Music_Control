@@ -20,7 +20,7 @@
 
 #ifdef BipEmulator
 	// статусы функции get_app_state
-	#define APP_STATE_BT_CON		0x200
+	#define APP_STATE_BT_CONNECTED		0x200
 	#include "libbip.h"
 #else
 	#include <libbip.h>
@@ -109,7 +109,7 @@ if ( (param0 == *app_data_p) && get_var_menu_overlay()){ // возврат из 
 #ifdef BipEmulator
 	app_data->last_bt_con = 1;
 #else
-	app_data->last_bt_con = check_app_state(APP_STATE_BT_CON);
+	app_data->last_bt_con = check_app_state(APP_STATE_BT_CONNECTED);
 #endif // !BipEmulator
 
 	//	если запуск был из быстрого меню, не включать экран приветствия
@@ -281,9 +281,9 @@ if ( (get_tick_count() - app_data->last_tick) > ((app_data->state==STATE_PAUSED)
 
 // если состояние BT изменилось, зафиксируем это и перересуем экран
 #ifndef BipEmulator
-if (app_data->last_bt_con != check_app_state(APP_STATE_BT_CON)){
+if (app_data->last_bt_con != check_app_state(APP_STATE_BT_CONNECTED)){
 	
-	app_data->last_bt_con = check_app_state(APP_STATE_BT_CON);	
+	app_data->last_bt_con = check_app_state(APP_STATE_BT_CONNECTED);	
 	draw_screen();
 	repaint_screen_lines(0, 176);
 	
@@ -335,7 +335,7 @@ switch (gest->gesture){
 		#ifdef BipEmulator
 			app_data->last_bt_con = 1;
 		#else
-			app_data->last_bt_con = check_app_state(APP_STATE_BT_CON);
+			app_data->last_bt_con = check_app_state(APP_STATE_BT_CONNECTED);
 		#endif
 		if (app_data->last_bt_con){
 	
@@ -642,7 +642,7 @@ d[1] = cmd;
 
 // если установлено BT соединение, отправляем команду
 #ifndef BipEmulator
-if (check_app_state(APP_STATE_BT_CON)){
+if (check_app_state(APP_STATE_BT_CONNECTED)){
 	send_host_app_data(0x42, 0x41, size, &d[0], 0);
 }
 #endif // !BipEmulator

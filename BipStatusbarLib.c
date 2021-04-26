@@ -19,7 +19,8 @@
 #define BATTERY_ICON
 #define TIME
 #define DATA
-#define BLUETOOTH
+#define BLUETOOTH_TEXT
+//#define BLUETOOTH
 // Выберите 1 из трех ALARM
 //#define ALARM_RING
 //#define ALARM_CLOCK
@@ -43,28 +44,31 @@ void show_statusbar(int y, int bgColor,int fgColor){
 	#ifdef BipEmulator
 			battery_percentage = 100;
 	#else
-		if (get_fw_version() == 11536){
-			battery_percentage = *((word*)(0x20000334));
-		}else if (get_fw_version() == 11205){
-			battery_percentage = *((word*)(0x2000067C));
-		}else if (get_fw_version() == 11512){
-			battery_percentage = *((word*)(0x200002C8));
-		}
+			battery_percentage = get_battery_charge();
 	#endif
 		#ifdef BATTERY_ICON
+			#ifdef BipEmulator
+			char charging = 1;
+			#else
+			char charging = IS_CHARGE_PLUGGED;
+			#endif
 			//Цвет индикатора батареи Colors battery indicator
 			char r_count = battery_percentage / 33;
 			r_count = r_count > 2 ? 2 : r_count < 1 ? 0 : r_count; // if r_count > 2 = 2 elseif r_count < 1 = 0 else r_count
+			if (charging) set_bg_color(COLOR_BLUE);
+			else{
 				if (battery_percentage > 32) { //set color
 					set_bg_color(battery_percentage <= 65 ? COLOR_YELLOW : COLOR_GREEN);
 				}else if (battery_percentage <= 32) {
 					set_bg_color(COLOR_RED);
 				}
+			}
 				//draw cells
 				for (char i = 0; i <= r_count; i++)
 				{
 					draw_filled_rect_bg(155 + i * 5, y + 2, 159 + i * 5, y + 14);
 				}
+				if (charging) text_out_center("⚡", 160, y);
 			#endif
 			#ifdef BATTERY_TEXT
 			//Проценты батареи Battery in percents
@@ -96,13 +100,13 @@ set_bg_color(bgColor); // делаем фон
 	_sprintf(data, "%02d.%02d", dt.day, dt.month);
 	text_out(data,4,y);		// печатаем print 
 #endif
-#ifdef BLUETOOTH
+#ifdef BLUETOOTH_TEXT
 	// БЛЮТУЗ 
 	char last_bt_con;
 	#ifdef BipEmulator
-		last_bt_con = 0;
+		last_bt_con = 1;
 	#else
-		last_bt_con = check_app_state(0x200);
+		last_bt_con = IS_BT_CONNECTED;
 	#endif
 		set_bg_color(COLOR_BLACK);
 		draw_filled_rect_bg(48, y-1, 62, y+17);
@@ -119,6 +123,11 @@ set_bg_color(bgColor); // делаем фон
 		text_out_center("ᛒ", 55, y);
 #endif
 
+// блютус ресурсом
+#ifdef BLUETOOTH
+int bt_icon = IS_BT_CONNECTED?RES_ICON_BT_CON:RES_ICON_BT_NOT_CON;
+show_elf_res_by_id(ELF_INDEX_SELF, bt_icon,	49, 0);
+#endif	  
 // Будильник Ring
 #ifdef ALARM_CLOCK_RING
 	set_bg_color(COLOR_BLACK); //подложка
